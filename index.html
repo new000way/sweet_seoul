@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한글과자 이름 변환기 | Hangeul Gwaja Name Converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            background: white;
+            padding: 20px 50px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 900;
+            color: #1a1a1a;
+            letter-spacing: -1px;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 50px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .hero p {
+            font-size: 20px;
+            opacity: 0.95;
+            margin-bottom: 40px;
+        }
+
+        /* Input Section */
+        .input-section {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .input-group {
+            margin-bottom: 30px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #7C3AED;
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+        }
+
+        /* Arrow */
+        .arrow {
+            text-align: center;
+            font-size: 40px;
+            color: #7C3AED;
+            margin: 20px 0;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Button */
+        .convert-btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
+        }
+
+        .convert-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Result Section */
+        .result-section {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 800px;
+            display: none;
+        }
+
+        .result-section.show {
+            display: block;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-section h2 {
+            font-size: 28px;
+            color: #7C3AED;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .korean-name {
+            font-size: 48px;
+            font-weight: 900;
+            color: #1a1a1a;
+            text-align: center;
+            margin: 30px 0;
+            letter-spacing: 4px;
+        }
+
+        /* Gwaja Display */
+        .gwaja-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin: 40px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #f8f4ff 0%, #faf5ff 100%);
+            border-radius: 15px;
+        }
+
+        .gwaja-piece {
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 900;
+            color: #FFF8DC;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+            animation: popIn 0.5s ease backwards;
+        }
+
+        .gwaja-piece:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .gwaja-piece:nth-child(1) { animation-delay: 0.1s; }
+        .gwaja-piece:nth-child(2) { animation-delay: 0.2s; }
+        .gwaja-piece:nth-child(3) { animation-delay: 0.3s; }
+        .gwaja-piece:nth-child(4) { animation-delay: 0.4s; }
+        .gwaja-piece:nth-child(5) { animation-delay: 0.5s; }
+        .gwaja-piece:nth-child(6) { animation-delay: 0.6s; }
+        .gwaja-piece:nth-child(7) { animation-delay: 0.7s; }
+        .gwaja-piece:nth-child(8) { animation-delay: 0.8s; }
+
+        .share-message {
+            text-align: center;
+            color: #666;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 30px;
+            opacity: 0.9;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav {
+                padding: 15px 20px;
+            }
+
+            .logo {
+                font-size: 24px;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+
+            .input-section {
+                padding: 30px 20px;
+            }
+
+            .korean-name {
+                font-size: 36px;
+            }
+
+            .gwaja-piece {
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">한글과자</div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>Find Your Korean Name</h1>
+            <p>Convert your name to Korean and see it with Hangeul Gwaja!</p>
+        </div>
+
+        <!-- Input Section -->
+        <div class="input-section">
+            <div class="input-group">
+                <label for="englishName">Enter Your Name (English)</label>
+                <input 
+                    type="text" 
+                    id="englishName" 
+                    placeholder="e.g., Alex, Sarah, Michael"
+                    autocomplete="off"
+                >
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <button class="convert-btn" onclick="convertName()">
+                Convert to Korean! 🍪
+            </button>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-section" id="resultSection">
+            <h2>Your Korean Name is...</h2>
+            <div class="korean-name" id="koreanName"></div>
+            
+            <div class="gwaja-container" id="gwajaContainer"></div>
+            
+            <div class="share-message">
+                ✨ Share your Korean name with Hangeul Gwaja on social media!
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>© 2024 한글과자 Hangeul Gwaja | Made with ❤️</p>
+    </div>
+
+    <script>
+        // English to Korean name conversion dictionary
+        const nameConversions = {
+            // Common names
+            'alex': '알렉스',
+            'alexander': '알렉산더',
+            'alice': '앨리스',
+            'amanda': '어맨다',
+            'amy': '에이미',
+            'andrew': '앤드류',
+            'angela': '안젤라',
+            'anna': '안나',
+            'anthony': '앤서니',
+            'ashley': '애슐리',
+            'barbara': '바바라',
+            'benjamin': '벤자민',
+            'betty': '베티',
+            'brian': '브라이언',
+            'carol': '캐롤',
+            'charles': '찰스',
+            'chris': '크리스',
+            'christine': '크리스틴',
+            'christopher': '크리스토퍼',
+            'daniel': '대니얼',
+            'david': '데이비드',
+            'deborah': '데보라',
+            'donald': '도널드',
+            'donna': '도나',
+            'dorothy': '도로시',
+            'edward': '에드워드',
+            'elizabeth': '엘리자베스',
+            'emily': '에밀리',
+            'emma': '엠마',
+            'eric': '에릭',
+            'frank': '프랭크',
+            'george': '조지',
+            'helen': '헬렌',
+            'henry': '헨리',
+            'jack': '잭',
+            'jacob': '제이콥',
+            'james': '제임스',
+            'jason': '제이슨',
+            'jennifer': '제니퍼',
+            'jessica': '제시카',
+            'john': '존',
+            'joseph': '조셉',
+            'joshua': '조슈아',
+            'karen': '카렌',
+            'kenneth': '케네스',
+            'kevin': '케빈',
+            'kimberly': '킴벌리',
+            'laura': '로라',
+            'linda': '린다',
+            'lisa': '리사',
+            'margaret': '마가렛',
+            'maria': '마리아',
+            'mark': '마크',
+            'mary': '메리',
+            'matthew': '매튜',
+            'melissa': '멜리사',
+            'michael': '마이클',
+            'michelle': '미셸',
+            'nancy': '낸시',
+            'nicole': '니콜',
+            'olivia': '올리비아',
+            'pamela': '파멜라',
+            'patricia': '패트리샤',
+            'paul': '폴',
+            'peter': '피터',
+            'rachel': '레이첼',
+            'rebecca': '레베카',
+            'richard': '리처드',
+            'robert': '로버트',
+            'ronald': '로널드',
+            'ryan': '라이언',
+            'samantha': '사만다',
+            'sandra': '산드라',
+            'sarah': '세라',
+            'scott': '스콧',
+            'sharon': '샤론',
+            'sophia': '소피아',
+            'stephanie': '스테파니',
+            'steven': '스티븐',
+            'susan': '수잔',
+            'thomas': '토마스',
+            'tim': '팀',
+            'timothy': '티모시',
+            'victor': '빅터',
+            'victoria': '빅토리아',
+            'william': '윌리엄'
+        };
+
+        function convertName() {
+            const input = document.getElementById('englishName').value.trim().toLowerCase();
+            
+            if (!input) {
+                alert('Please enter your name!');
+                return;
+            }
+
+            let koreanName = nameConversions[input];
+            
+            // If name not in dictionary, create a simple conversion
+            if (!koreanName) {
+                koreanName = simpleConversion(input);
+            }
+
+            // Display result
+            document.getElementById('koreanName').textContent = koreanName;
+            
+            // Create Gwaja pieces
+            createGwajaPieces(koreanName);
+            
+            // Show result section
+            document.getElementById('resultSection').classList.add('show');
+            
+            // Scroll to result
+            document.getElementById('resultSection').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+
+        function simpleConversion(name) {
+            // Simple phonetic conversion for names not in dictionary
+            const conversionMap = {
+                'a': '아', 'b': '브', 'c': '크', 'd': '드', 'e': '에',
+                'f': '프', 'g': '그', 'h': '흐', 'i': '이', 'j': '제',
+                'k': '크', 'l': '르', 'm': '므', 'n': '느', 'o': '오',
+                'p': '프', 'q': '큐', 'r': '르', 's': '스', 't': '트',
+                'u': '우', 'v': '브', 'w': '우', 'x': '크스', 'y': '이', 'z': '즈'
+            };
+
+            return name.split('').map(char => conversionMap[char] || char).join('');
+        }
+
+        function createGwajaPieces(koreanName) {
+            const container = document.getElementById('gwajaContainer');
+            container.innerHTML = '';
+
+            // Split Korean name into individual characters
+            const characters = koreanName.split('');
+
+            characters.forEach((char, index) => {
+                const piece = document.createElement('div');
+                piece.className = 'gwaja-piece';
+                piece.textContent = char;
+                piece.style.animationDelay = `${index * 0.1}s`;
+                container.appendChild(piece);
+            });
+        }
+
+        // Allow Enter key to convert
+        document.getElementById('englishName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                convertName();
+            }
+        });
+    </script>
+</body>
+</html>
